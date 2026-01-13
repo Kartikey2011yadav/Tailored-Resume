@@ -2,57 +2,63 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import { Resume, Basics, Work, Metadata } from "@/types/resume";
-
-interface EditorFormProps {
-    section: keyof Resume;
-    data: Resume[keyof Resume];
-    onChange: (data: Resume[keyof Resume]) => void;
-}
+import { Resume, Work, Metadata } from "@/types/resume";
+import { useResumeStore } from "@/lib/store/resume";
 
 // Temporary Inline Forms - Will replace with robust components later
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+interface EditorFormProps {
+    section: keyof Resume;
+}
+
 // ... BasicsForm ...
-const BasicsForm = ({ data, onChange }: { data: Basics, onChange: (d: Basics) => void }) => (
+const BasicsForm = () => {
+    const { resume, updateBasics } = useResumeStore();
+    const data = resume?.basics;
+
+    if (!data) return null;
+
+    return (
     <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
                 <Label>Full Name</Label>
-                <Input value={data?.name || ""} onChange={e => onChange({ ...data, name: e.target.value })} />
+                <Input value={data?.name || ""} onChange={e => updateBasics({ name: e.target.value })} />
             </div>
             <div className="space-y-2">
                 <Label>Job Title</Label>
-                <Input value={data?.label || ""} onChange={e => onChange({ ...data, label: e.target.value })} />
+                <Input value={data?.label || ""} onChange={e => updateBasics({ label: e.target.value })} />
             </div>
         </div>
         <div className="space-y-2">
             <Label>Email</Label>
-            <Input value={data?.email || ""} onChange={e => onChange({ ...data, email: e.target.value })} />
+            <Input value={data?.email || ""} onChange={e => updateBasics({ email: e.target.value })} />
         </div>
         <div className="space-y-2">
             <Label>Phone</Label>
-            <Input value={data?.phone || ""} onChange={e => onChange({ ...data, phone: e.target.value })} />
+            <Input value={data?.phone || ""} onChange={e => updateBasics({ phone: e.target.value })} />
         </div>
         <div className="space-y-2">
             <Label>Summary</Label>
-            <Textarea className="h-32" value={data?.summary || ""} onChange={e => onChange({ ...data, summary: e.target.value })} />
+            <Textarea className="h-32" value={data?.summary || ""} onChange={e => updateBasics({ summary: e.target.value })} />
         </div>
     </div>
-);
+)};
 
-const WorkForm = ({ data, onChange }: { data: Work[], onChange: (d: Work[]) => void }) => {
-    const addFn = () => onChange([...data, { company: "New Company", position: "Role", startDate: "", endDate: "" }]);
+const WorkForm = () => {
+    const { resume, updateSection } = useResumeStore();
+    const data = (resume?.work || []) as Work[];
+
     const updateFn = <K extends keyof Work>(index: number, field: K, value: Work[K]) => {
         const newData = [...data];
         newData[index] = { ...newData[index], [field]: value };
-        onChange(newData);
+        updateSection("work", newData);
     };
-    const removeFn = (index: number) => {
-        onChange(data.filter((_, i) => i !== index));
-    };
+    const addFn = () => updateSection("work", [...data, { company: "New Company", position: "Role", startDate: "", endDate: "" }]);
+    const removeFn = (index: number) => updateSection("work", data.filter((_, i) => i !== index));
 
     return (
         <div className="space-y-6">
@@ -99,12 +105,12 @@ const WorkForm = ({ data, onChange }: { data: Work[], onChange: (d: Work[]) => v
     );
 };
 
-const SettingsForm = ({ data, onChange }: { data: Metadata, onChange: (d: Metadata) => void }) => {
-    // Ensure metadata structure exists
-    const metadata = data || { template: "resume", theme: { primary: "#000000" } };
+const SettingsForm = () => {
+    const { resume, updateSection } = useResumeStore();
+    const data = (resume?.resume_metadata || { template: "resume", theme: { primary: "#000000" } }) as Metadata;
     
     const updateTemplate = (tpl: string) => {
-        onChange({ ...metadata, template: tpl });
+        updateSection("resume_metadata", { ...data, template: tpl });
     };
 
     return (
@@ -120,7 +126,7 @@ const SettingsForm = ({ data, onChange }: { data: Metadata, onChange: (d: Metada
                             onClick={() => updateTemplate(tpl)}
                             className={`
                                 cursor-pointer border-2 rounded-lg p-4 text-center capitalize hover:border-primary/50 transition-all
-                                ${metadata.template === tpl ? "border-primary bg-primary/5 shadow-sm" : "border-slate-200 dark:border-slate-800"}
+                                ${data.template === tpl ? "border-primary bg-primary/5 shadow-sm" : "border-slate-200 dark:border-slate-800"}
                             `}
                         >
                             <div className="w-full aspect-[210/297] bg-slate-100 dark:bg-slate-800 mb-2 rounded border border-slate-200 dark:border-slate-700"></div>
@@ -133,15 +139,15 @@ const SettingsForm = ({ data, onChange }: { data: Metadata, onChange: (d: Metada
     );
 };
 
-export default function EditorForm({ section, data, onChange }: EditorFormProps) {
+export default function EditorForm({ section }: EditorFormProps) {
     if (section === "basics") {
-        return <BasicsForm data={data as Basics} onChange={onChange as (d: Basics) => void} />;
+        return <BasicsForm />;
     }
     if (section === "work") {
-        return <WorkForm data={data as Work[]} onChange={onChange as (d: Work[]) => void} />;
+        return <WorkForm />;
     }
     if (section === "resume_metadata") {
-        return <SettingsForm data={data as Metadata} onChange={onChange as (d: Metadata) => void} />;
+        return <SettingsForm />;
     }
 
     return (

@@ -66,6 +66,14 @@ class Metadata(SQLModel):
     css: Dict[str, Any] = {"value": "", "visible": False}
     theme: Dict[str, str] = {"text": "#000000", "background": "#ffffff", "primary": "#0000ff"}
 
+class User(SQLModel, table=True):
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    email: str = Field(unique=True, index=True)
+    hashed_password: str
+    is_active: bool = True
+    
+    resumes: List["Resume"] = Relationship(back_populates="user")
+
 # DB Model
 class Resume(SQLModel, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
@@ -82,6 +90,9 @@ class Resume(SQLModel, table=True):
     
     created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
     updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+
+    user_id: Optional[UUID] = Field(default=None, foreign_key="user.id")
+    user: Optional["User"] = Relationship(back_populates="resumes")
 
 # API Models
 class MasterResume(SQLModel):

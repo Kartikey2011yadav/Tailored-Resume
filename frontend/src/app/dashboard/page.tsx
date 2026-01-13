@@ -3,22 +3,28 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, Copy, FileText, Loader2 } from "lucide-react";
+import { Plus, Trash2, Copy, FileText, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { fetchResumes, createResume, deleteResume, duplicateResume } from "@/lib/api";
 import { Resume } from "@/types/resume";
-import { ThemeToggle } from "@/components/ThemeToggle"; // Add import
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAuthStore } from "@/lib/store/auth";
 
 export default function DashboardPage() {
     const router = useRouter();
+    const { isAuthenticated, logout } = useAuthStore();
     const [resumes, setResumes] = useState<Resume[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            router.push("/auth/login");
+            return;
+        }
         loadResumes();
-    }, []);
+    }, [isAuthenticated, router]);
 
     const loadResumes = async () => {
         try {
@@ -71,6 +77,11 @@ export default function DashboardPage() {
             setActionLoading(null);
         }
     };
+    
+    const handleLogout = () => {
+        logout();
+        router.push("/auth/login");
+    };
 
     if (loading) {
         return (
@@ -80,7 +91,8 @@ export default function DashboardPage() {
         );
     }
 
-// ... inside component ...
+    if (!isAuthenticated) return null; // Avoid flashing content before redirect
+
     return (
         <div className="container mx-auto p-8 max-w-7xl">
             <div className="flex items-center justify-between mb-8">
@@ -89,6 +101,9 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <ThemeToggle />
+                    <Button variant="outline" size="icon" onClick={handleLogout} title="Sign Out">
+                        <LogOut className="w-4 h-4" />
+                    </Button>
                     <Button onClick={handleCreate} disabled={!!actionLoading}>
                         {actionLoading === "create" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                         <Plus className="w-4 h-4 mr-2" />

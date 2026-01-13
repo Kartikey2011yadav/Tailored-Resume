@@ -1,18 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Resume } from "@/types/resume";
+import { useResumeStore } from "@/lib/store/resume";
 import { Loader2 } from "lucide-react";
 
-interface EditorPreviewProps {
-    resume: Resume;
-}
-
-export default function EditorPreview({ resume }: EditorPreviewProps) {
+export default function EditorPreview() {
+    const resume = useResumeStore((state) => state.resume);
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        if (!resume) return;
+
+        const generatePdf = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch("http://localhost:8000/api/generate-pdf", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(resume),
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    setPdfUrl(url);
+                }
+            } catch (error) {
+                console.error("PDF Gen failed", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         const timeout = setTimeout(() => {
             generatePdf();
         }, 1500); // 1.5s debounce for preview generation
@@ -20,25 +39,7 @@ export default function EditorPreview({ resume }: EditorPreviewProps) {
         return () => clearTimeout(timeout);
     }, [resume]);
 
-    const generatePdf = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch("http://localhost:8000/api/generate-pdf", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(resume),
-            });
-            if (res.ok) {
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                setPdfUrl(url);
-            }
-        } catch (error) {
-            console.error("PDF Gen failed", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    if (!resume) return <div className="h-full flex items-center justify-center text-slate-400">No content</div>;
 
     return (
         <div className="h-full flex flex-col items-center justify-center bg-slate-200 dark:bg-slate-950 rounded-lg overflow-hidden relative shadow-inner">

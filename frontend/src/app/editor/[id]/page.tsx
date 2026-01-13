@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Resume, Basics, Work, Education, Project, Skill } from "@/types/resume";
-import { fetchResume, updateResume } from "@/lib/api";
-import { debounce } from "@/lib/utils";
+import { fetchResume } from "@/lib/api";
 import { ThemeToggle } from "@/components/ThemeToggle"; 
+import { useResumeStore } from "@/lib/store/resume";
+import { useAuthStore } from "@/lib/store/auth";
+import { Resume } from "@/types/resume";
 
-// Sub-components (Inline for now, will extract later)
 import EditorNav from "./_components/EditorNav";
 import EditorForm from "./_components/EditorForm";
 import EditorPreview from "./_components/EditorPreview";
@@ -19,63 +19,47 @@ export default function EditorPage() {
     const params = useParams();
     const router = useRouter();
     const id = params.id as string;
-
-    const [resume, setResume] = useState<Resume | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    
+    // Global State
+    const { isAuthenticated } = useAuthStore();
+    const { resume, setResume, isLoading, isSaving } = useResumeStore();
+    
+    // UI State
     const [activeSection, setActiveSection] = useState<keyof Resume>("basics");
 
-    // Debounced Save
-    const debouncedSave = useCallback(
-        debounce(async (data: Partial<Resume>) => {
-            setSaving(true);
-            try {
-                await updateResume(id, data);
-            } catch (err) {
-                console.error("Auto-save failed", err);
-            } finally {
-                setSaving(false);
-            }
-        }, 1000),
-        [id]
-    );
-
+    // Auth Check
     useEffect(() => {
-        loadResume();
-    }, [id]);
-
-    const loadResume = async () => {
-        try {
-            const data = await fetchResume(id);
-            setResume(data);
-        } catch (error) {
-            console.error(error);
-            alert("Failed to load resume");
-            router.push("/dashboard");
-        } finally {
-            setLoading(false);
+        if (!isAuthenticated) {
+            router.push("/auth/login");
         }
-    };
+    }, [isAuthenticated, router]);
 
-    const handleUpdate = (section: keyof Resume, data: Resume[keyof Resume]) => {
-        if (!resume) return;
-        const updatedResume = { ...resume, [section]: data };
-        setResume(updatedResume);
-        debouncedSave({ [section]: data });
-    };
-    
-    // Specific handlers for array updates (Work, Edu, etc.)
-    // For simplicity, EditorForm will bubble up the entire section data
+    // Data Fetch
+    useEffect(() => {
+        const load = async () => {
+            if (!isAuthenticated) return;
+            try {
+                const data = await fetchResume(id);
+                setResume(data);
+            } catch (error) {
+                console.error(error);
+                router.push("/dashboard");
+            }
+        };
+        load();
+    }, [id, isAuthenticated, router, setResume]);
 
-    if (loading) {
+    if (!isAuthenticated) return null;
+
+    if (isLoading && !resume) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
-
-    if (!resume) return null;
+    
+    if (!resume) return null; // Should have redirected
 
     return (
         <div className="flex h-screen flex-col">
@@ -91,7 +75,7 @@ export default function EditorPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="text-sm text-slate-500 flex items-center gap-2">
-                        {saving ? (
+                        {isSaving ? (
                             <>
                                 <Loader2 className="w-3 h-3 animate-spin" /> Saving...
                             </>
@@ -102,7 +86,6 @@ export default function EditorPage() {
                         )}
                     </div>
                     <ThemeToggle />
-                    {/* <Button size="sm">Download PDF</Button> */}
                 </div>
             </header>
 
@@ -116,17 +99,13 @@ export default function EditorPage() {
                 {/* Center: Form Editor */}
                 <div className="flex-1 overflow-y-auto p-8 bg-white dark:bg-slate-950">
                     <div className="max-w-2xl mx-auto">
-                        <EditorForm 
-                            section={activeSection} 
-                            data={resume[activeSection]} 
-                            onChange={(data: Resume[keyof Resume]) => handleUpdate(activeSection, data)}
-                        />
+                        <EditorForm section={activeSection} />
                     </div>
                 </div>
 
                 {/* Right: Preview */}
                 <div className="w-1/2 border-l bg-slate-100 dark:bg-slate-900/50 p-4">
-                    <EditorPreview resume={resume} />
+                    <EditorPreview />
                 </div>
             </div>
         </div>

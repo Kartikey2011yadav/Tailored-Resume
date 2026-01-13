@@ -6,3 +6,5 @@ langchain-openai
 pydantic
 jinja2
 python-multipart
+passlib[bcrypt]
+python-jose[cryptography]
