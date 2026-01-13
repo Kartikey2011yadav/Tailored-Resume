@@ -1,0 +1,85 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[left=0.5in, right=0.5in, top=0.5in, bottom=0.5in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+% Minimalist formatting
+\titleformat{\section}{\large\scshape\raggedright}{}{0em}{}[\titlerule]
+\titlespacing{\section}{0pt}{10pt}{5pt}
+\pagestyle{empty}
+
+\begin{document}
+
+% Header
+\begin{center}
+    {\huge \textbf{ {{ basics.name }} }} \\
+    {{ basics.location.city }}, {{ basics.location.region }} | {{ basics.email }}
+    {% if basics.phone %} | {{ basics.phone }} {% endif %}
+    {% if basics.url %} | \href{ {{ basics.url }} }{Portfolio} {% endif %}
+    {% for profile in basics.profiles %}
+    | \href{ {{ profile.url }} }{ {{ profile.network }} }
+    {% endfor %}
+\end{center}
+
+% Summary
+{% if basics.summary %}
+\section{Summary}
+{{ basics.summary }}
+{% endif %}
+
+% Experience
+\section{Experience}
+{% for job in work %}
+\noindent
+\textbf{ {{ job.company }} } \hfill {{ job.startDate }} - {{ job.endDate }} \\
+\textit{ {{ job.position }} }
+\begin{itemize}[noitemsep,topsep=0pt]
+    {% for highlight in job.highlights %}
+    \item {{ highlight }}
+    {% endfor %}
+\end{itemize}
+\medskip
+{% endfor %}
+
+% Education
+\section{Education}
+{% for edu in education %}
+\noindent
+\textbf{ {{ edu.institution }} } \hfill {{ edu.startDate }} - {{ edu.endDate }} \\
+{{ edu.studyType }} in {{ edu.area }}
+{% if edu.score %}
+(GPA: {{ edu.score }})
+{% endif %}
+\medskip
+{% endfor %}
+
+% Skills
+\section{Skills}
+\begin{itemize}[noitemsep,topsep=0pt]
+    {% for skill in skills %}
+    \item \textbf{ {{ skill.name }}: } {{ skill.keywords | join(", ") }}
+    {% endfor %}
+\end{itemize}
+
+% Projects
+{% if projects %}
+\section{Projects}
+{% for project in projects %}
+\noindent
+\textbf{ {{ project.name }} }
+{% if project.url %}
+\hfill \href{ {{ project.url }} }{Link}
+{% endif %}
+\\
+{{ project.description }}
+\begin{itemize}[noitemsep,topsep=0pt]
+    {% for highlight in project.highlights %}
+    \item {{ highlight }}
+    {% endfor %}
+\end{itemize}
+\medskip
+{% endfor %}
+{% endif %}
+
+\end{document}
