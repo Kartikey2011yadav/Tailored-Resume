@@ -1,8 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from app.db import create_db_and_tables
 from app.api.endpoints import router as api_router
+from app.api.resumes import router as resumes_router
 
-app = FastAPI(title="Tailored Resume API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
+
+app = FastAPI(title="Tailored Resume API", lifespan=lifespan)
 
 # CORS for Frontend
 app.add_middleware(
@@ -14,6 +22,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix="/api")
+app.include_router(resumes_router, prefix="/api/resumes", tags=["resumes"])
 
 @app.get("/")
 def read_root():

@@ -110,6 +110,34 @@
           }
         }
       }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "template": { "type": "string" },
+        "layout": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "css": {
+          "type": "object",
+          "properties": {
+            "value": { "type": "string" },
+            "visible": { "type": "boolean" }
+          }
+        },
+        "theme": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" },
+            "background": { "type": "string" },
+            "primary": { "type": "string" }
+          }
+        }
+      }
     }
   }
 }

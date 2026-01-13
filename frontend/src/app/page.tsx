@@ -12,16 +12,16 @@ export default function Home() {
           Supercharge your job search. Use AI to tailor your master resume to any job description and generate a perfect LaTeX PDF in seconds.
         </p>
         <div className="flex justify-center gap-4">
-            <Link href="/tailor">
-                <Button size="lg" className="h-12 px-8 text-lg">
+            <Button asChild size="lg" className="h-12 px-8 text-lg">
+                <Link href="/tailor" suppressHydrationWarning>
                     Start Tailoring
-                </Button>
-            </Link>
-             <Link href="https://github.com/yourusername/tailored-resume">
-                <Button variant="outline" size="lg" className="h-12 px-8 text-lg">
+                </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-lg">
+                <Link href="https://github.com/yourusername/tailored-resume" suppressHydrationWarning>
                     View on GitHub
-                </Button>
-            </Link>
+                </Link>
+            </Button>
         </div>
       </div>
     </div>

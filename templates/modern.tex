@@ -1,0 +1,113 @@
+\documentclass[11pt, letterpaper]{article}
+
+% Modern Resume Template
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage{helvet} % Sans-serif font
+\renewcommand{\familydefault}{\sfdefault}
+
+\input{glyphtounicode}
+
+\pagestyle{empty}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-0.5in}
+\addtolength{\textheight}{1.0in}
+
+\titleformat{\section}{
+  \vspace{-5pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+\newcommand{\resumeItem}[1]{
+  \item\small{#1 \vspace{-2pt}}
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\begin{document}
+
+%----------HEADING-----------------
+\begin{center}
+    {\Huge \scshape \VAR{basics.name}} \\ \vspace{2pt}
+    \small 
+    \faEnvelope \ \VAR{basics.email} ~
+    \faPhone \ \VAR{basics.phone} ~
+    \faMapMarker \ \VAR{basics.location.city}, \VAR{basics.location.region} \\
+    \faLink \ \href{\VAR{basics.url}}{\VAR{basics.url}}
+\end{center}
+
+%-----------EXPERIENCE-----------------
+\section{Experience}
+  \begin{itemize}[leftmargin=0.15in, label={}]
+  \BLOCK{for job in work}
+    \resumeSubheading
+      {\VAR{job.company}}{\VAR{job.startDate} -- \VAR{job.endDate}}
+      {\VAR{job.position}}{\VAR{job.location}}
+      \begin{itemize}
+        \BLOCK{if job.summary}
+        \resumeItem{\VAR{job.summary}}
+        \BLOCK{endif}
+        \BLOCK{for highlight in job.highlights}
+        \resumeItem{\VAR{highlight}}
+        \BLOCK{endfor}
+      \end{itemize}
+  \BLOCK{endfor}
+  \end{itemize}
+
+%-----------PROJECTS-----------------
+\section{Projects}
+    \begin{itemize}[leftmargin=0.15in, label={}]
+      \BLOCK{for proj in projects}
+        \resumeSubheading
+          {\VAR{proj.name}}{\VAR{proj.startDate} -- \VAR{proj.endDate}}
+          {\VAR{proj.description}}{}
+          \begin{itemize}
+            \BLOCK{for highlight in proj.highlights}
+            \resumeItem{\VAR{highlight}}
+            \BLOCK{endfor}
+          \end{itemize}
+      \BLOCK{endfor}
+    \end{itemize}
+
+%-----------EDUCATION-----------------
+\section{Education}
+  \begin{itemize}[leftmargin=0.15in, label={}]
+  \BLOCK{for edu in education}
+    \resumeSubheading
+      {\VAR{edu.institution}}{\VAR{edu.endDate}}
+      {\VAR{edu.studyType} in \VAR{edu.area}}{\VAR{edu.location}}
+      \BLOCK{if edu.courses}
+        \begin{itemize}
+            \resumeItem{\textbf{Coursework}: \VAR{edu.courses | join(", ")}}
+        \end{itemize}
+      \BLOCK{endif}
+  \BLOCK{endfor}
+  \end{itemize}
+
+%-----------SKILLS-----------------
+\section{Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \BLOCK{for skill in skills}
+     \textbf{\VAR{skill.name}}: \VAR{skill.keywords | join(", ")} \\
+     \BLOCK{endfor}
+    }}
+ \end{itemize}
+
+\end{document}

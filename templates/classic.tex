@@ -1,0 +1,126 @@
+\documentclass[11pt, letterpaper]{article}
+
+% Classic Resume Template
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+
+\pagestyle{fancy}
+\fancyhf{} 
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item\small{
+    \textbf{#1}{: #2 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\renewcommand{\labelitemi}{$\bullet$}
+\renewcommand{\labelitemii}{$\circ$}
+
+\begin{document}
+
+%----------HEADING-----------------
+\begin{center}
+    \textbf{\Large \VAR{basics.name}} \\ \vspace{2pt}
+    \VAR{basics.email} $|$ \VAR{basics.phone} $|$ \VAR{basics.location.city}, \VAR{basics.location.region} \\
+    \href{\VAR{basics.url}}{\VAR{basics.url}}
+\end{center}
+
+
+%-----------EDUCATION-----------------
+\section{Education}
+  \resumeSubHeadingListStart
+  \BLOCK{for edu in education}
+    \resumeSubheading
+      {\VAR{edu.institution}}{\VAR{edu.endDate}}
+      {\VAR{edu.studyType} in \VAR{edu.area}}{\VAR{edu.location}}
+      \BLOCK{if edu.courses}
+      \resumeItemListStart
+        \resumeItem{Coursework}{\VAR{edu.courses | join(", ")}}
+      \resumeItemListEnd
+      \BLOCK{endif}
+  \BLOCK{endfor}
+  \resumeSubHeadingListEnd
+
+
+%-----------EXPERIENCE-----------------
+\section{Experience}
+  \resumeSubHeadingListStart
+  
+  \BLOCK{for job in work}
+    \resumeSubheading
+      {\VAR{job.company}}{\VAR{job.startDate} -- \VAR{job.endDate}}
+      {\VAR{job.position}}{\VAR{job.location}}
+      \resumeItemListStart
+        \BLOCK{if job.summary}
+        \item \small{\VAR{job.summary}}
+        \BLOCK{endif}
+        \BLOCK{for highlight in job.highlights}
+        \item \small{\VAR{highlight}}
+        \BLOCK{endfor}
+      \resumeItemListEnd
+  \BLOCK{endfor}
+
+  \resumeSubHeadingListEnd
+
+%-----------PROJECTS-----------------
+\section{Projects}
+  \resumeSubHeadingListStart
+  \BLOCK{for proj in projects}
+    \resumeSubheading
+      {\VAR{proj.name}}{\VAR{proj.startDate} -- \VAR{proj.endDate}}
+      {\VAR{proj.description}}{}
+      \resumeItemListStart
+        \BLOCK{for highlight in proj.highlights}
+        \item \small{\VAR{highlight}}
+        \BLOCK{endfor}
+      \resumeItemListEnd
+  \BLOCK{endfor}
+  \resumeSubHeadingListEnd
+
+%-----------SKILLS-----------------
+\section{Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \BLOCK{for skill in skills}
+     \textbf{\VAR{skill.name}}: \VAR{skill.keywords | join(", ")} \\
+     \BLOCK{endfor}
+    }}
+ \end{itemize}
+
+\end{document}

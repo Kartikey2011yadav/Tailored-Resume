@@ -1,5 +1,7 @@
-from typing import List, Optional
-from sqlmodel import SQLModel, Field, Relationship
+from typing import List, Optional, Dict, Any
+from sqlmodel import SQLModel, Field, Relationship, JSON, Column
+from uuid import UUID, uuid4
+import datetime
 
 # Shared Pydantic models (mirroring schema.json for validation)
 
@@ -16,9 +18,9 @@ class Profile(SQLModel):
     url: Optional[str] = None
 
 class Basics(SQLModel):
-    name: str
+    name: str = "Your Name"
     label: Optional[str] = None
-    email: str
+    email: str = "email@example.com"
     phone: Optional[str] = None
     url: Optional[str] = None
     summary: Optional[str] = None
@@ -58,12 +60,37 @@ class Project(SQLModel):
     url: Optional[str] = None
     roles: List[str] = []
 
+class Metadata(SQLModel):
+    template: str = "modern"
+    layout: List[List[str]] = []
+    css: Dict[str, Any] = {"value": "", "visible": False}
+    theme: Dict[str, str] = {"text": "#000000", "background": "#ffffff", "primary": "#0000ff"}
+
+# DB Model
+class Resume(SQLModel, table=True):
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    title: str = "Untitled Resume"
+    slug: str = Field(default=None, unique=True)
+    
+    # Store JSON data in JSON columns for flexibility with SQLModel/SQLite
+    basics: Dict = Field(default_factory=dict, sa_column=Column(JSON))
+    work: List[Dict] = Field(default_factory=list, sa_column=Column(JSON))
+    education: List[Dict] = Field(default_factory=list, sa_column=Column(JSON))
+    skills: List[Dict] = Field(default_factory=list, sa_column=Column(JSON))
+    projects: List[Dict] = Field(default_factory=list, sa_column=Column(JSON))
+    resume_metadata: Dict = Field(default_factory=dict, sa_column=Column(JSON))
+    
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    updated_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+
+# API Models
 class MasterResume(SQLModel):
     basics: Basics
     work: List[Work] = []
     education: List[Education] = []
     skills: List[Skill] = []
     projects: List[Project] = []
+    resume_metadata: Metadata = Field(default_factory=Metadata)
 
 class TailoredResume(MasterResume):
     job_description: Optional[str] = None
